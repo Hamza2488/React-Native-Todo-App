@@ -1,17 +1,38 @@
 import React, { useState } from 'react'
-import { Text, TextInput, View, StyleSheet, Button, Image, TouchableOpacity, ImageBackground } from 'react-native'
+import { Text, TextInput, View, StyleSheet, Button, Image, TouchableOpacity, ImageBackground, Alert, ScrollView } from 'react-native'
 import logo from './Images/todo.png'
 import addi from './Images/add.png'
 import dele from './Images/del.png'
 import ed from './Images/edit.png'
-import bgimage from './Images/bgimage.jpg'
+import bgimage from './Images/bgimage.png'
 
 const App = () => {
   const [list, setList] = useState([])
   const [text, setText] = useState('')
+  const [index, setIndex] = useState(null)
+  const [longPress, setLongPress] = useState(false)
 
   const add = () => {
-    setList([...list, text])
+
+    if (!text) {
+      Alert.alert('Error', 'Enter Text', [{
+        text:'Okay'
+      }])
+      return
+    }
+
+
+
+    if (index && index >-1) {
+      list[index] = text
+      setList([...list])
+      setIndex(null)
+      setText('')
+    }else{
+
+      setList([...list, text])
+      setText('')
+    }
   }
 
   const del = (i) => {
@@ -19,18 +40,21 @@ const App = () => {
     setList([...list])
   }
 
-
-  const [edditItem, setEdditItem] = useState("");
-  const [toggleButton, setToggleButton] = useState(false);
-
-  const editItem = (index) => {
-    const todo_list_edit = text.find((curElem) => {
-      return curElem.id === index;
-    });
-    setInputData(todo_list_edit.value);
-    setEdditItem(index);
-    setToggleButton(true);
+  let edit = i => {
+    setIndex(i);
+    let obj = list[i];
+    setText(obj);
+    console.log(obj)
   };
+  
+
+  const long = ()=>{
+
+    setLongPress(false)
+    setTimeout(() => {
+      setLongPress(true)
+    }, 3000);
+  }
 
 
   return (
@@ -106,38 +130,46 @@ const App = () => {
 
 
     // Todo App
-
+<View>
     <ImageBackground style={{ width: '100%', height: '100%' }} source={bgimage}>
     <View style={styels.container}>
       <Text style={styels.heading}>Todo App</Text>
 
       <View style={{ flexDirection: 'row' }}>
-        <TextInput onChangeText={(e) => setText(e)} style={[styels.input, { flex: 4 }]} placeholder='Enter Todo' />
-        {/* <TouchableOpacity onPress={add} >
-          <Image style={[styels.addButton,{ width: 30, height: 30 }]} source={addi} />
-        </TouchableOpacity> */}
+        <TextInput value={text} onChangeText={(e) => setText(e)} style={[styels.input, { flex: 4 }]} placeholderTextColor={'white'}  placeholder="What's Your Task?" />
         
-        {toggleButton ?
-                (
-                  <TouchableOpacity onPress={editItem}>
-          <Image style={[styels.delButton,{ width: 30, height: 30 }]} source={ed} />
-                    
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity onPress={add}>
-          <Image style={[styels.addButton,{ width: 30, height: 30 }]} source={addi} />
-                  </TouchableOpacity>
-                )
-              }
-      </View>
-      {list.map((x, i) => <View style={[styels.list,{flexDirection:'row'}]} key={i}><Text style={styels.todos}>{x}</Text>
-        {/* <Button title='Delete'  onPress={()=>del(i)} color='red' /> */}
-        <TouchableOpacity onPress={()=>del(i)}>
-          <Image style={[styels.delButton,{ width: 30, height: 30 }]} source={dele} />
+        {index?
+        (
+          <TouchableOpacity onPress={add} >
+          <Image style={[styels.addButton,{ width: 30, height: 30 }]} source={ed} />
         </TouchableOpacity>
-      </View>)}
-    </View>
+        ):(<TouchableOpacity onPress={add} >
+          <Image style={[styels.addButton,{ width: 30, height: 30 }]} source={addi} />
+        </TouchableOpacity>)}
+        
+        
+       
+      </View>
+    
+      <ScrollView>
+      {list.map((x, i) => <TouchableOpacity onLongPress={long} style={[styels.list,{flexDirection:'row'}]} key={i}><Text style={styels.todos}>{x}</Text>
+       
+       
+        <View style={{flexDirection:'row'}}>
+        <TouchableOpacity onPress={()=>edit(i)}>
+        <Image style={[styels.delButton,{ width: 30, height: 30 }]} source={ed} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={()=>del(i)}>
+        <Image style={[styels.delButton,{ width: 30, height: 30 }]} source={dele} />
+      </TouchableOpacity>
+      </View>
+        
+         
+      </TouchableOpacity>)}
+      </ScrollView>
+       </View>
     </ImageBackground>
+    </View>
   
   )
 }
@@ -164,22 +196,17 @@ const styels = StyleSheet.create({
   },
   input: {
     borderBottomWidth: 2,
-    borderColor: 'lightgreen',
+    borderColor: 'white',
     marginVertical: 20,
     width: '100%',
-    fontSize: 20,
-    color: 'green'
+    fontSize: 17,
+    color: 'white', 
   },
-list:{
-  borderWidth:2,
-  borderColor:'skyblue',
-  marginVertical: 10,
-},
 todos: {
-    fontSize:15,
+    fontSize:18,
     marginVertical: 5,
-    padding:10,
-    color: 'black',
+    padding:8,
+    color: 'white',
     fontWeight: 'bold',
     borderRadius: 5,
     width:'75%'
